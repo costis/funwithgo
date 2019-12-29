@@ -3,12 +3,11 @@ package main
 import (
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"strconv"
 )
 
-func showHome(w http.ResponseWriter, r *http.Request) {
+func (a *application)showHome(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		w.Header().Set("Allowed", "GET")
 		w.WriteHeader(http.StatusNotAcceptable)
@@ -18,7 +17,6 @@ func showHome(w http.ResponseWriter, r *http.Request) {
 
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)
-		log.Println("boo")
 		return
 	}
 
@@ -30,20 +28,19 @@ func showHome(w http.ResponseWriter, r *http.Request) {
 
 	ts, err := template.ParseFiles(files...)
 	if err != nil {
-		log.Println(err.Error())
+		a.infoLog.Println(err.Error())
 		http.Error(w, "Internal Server Error", 500)
 		return
 	}
 
 	err = ts.Execute(w, nil)
 	if err != nil {
-		log.Println(err.Error())
+		a.infoLog.Println(err.Error())
 		http.Error(w, "Internal Server Error", 500)
 	}
-
 }
 
-func createSnippet(w http.ResponseWriter, r *http.Request) {
+func (a *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.Header().Set("Allowed", http.MethodPost)
 		w.WriteHeader(http.StatusMethodNotAllowed)
@@ -54,7 +51,7 @@ func createSnippet(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Creating a snippet"))
 }
 
-func showSnippet(w http.ResponseWriter, r *http.Request) {
+func (a *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		w.Header().Set("Allowed", http.MethodGet)
 		w.WriteHeader(http.StatusMethodNotAllowed)
