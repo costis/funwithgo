@@ -1,0 +1,11 @@
+{{ template "base" . }}
+
+{{ define "title"}} Snippet #{{.ID}} {{end}}
+
+{{ define "main" }}
+    Title: {{ .Title }}<br>
+    Content: {{ .Content }} <br>
+
+    Created: {{ .Created }}<br>
+    Expiry: {{ .Expires }}<br>
+{{end}}

@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"html/template"
 	"mrmambo.dev/snippetbox/pkg/models"
 	"net/http"
 	"strconv"
@@ -22,25 +21,12 @@ func (app *application) showHome(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	files := []string{
-		"./ui/html/home.page.gohtml",
-		"./ui/html/base.layout.gohtml",
-		"./ui/html/footer.gohtml",
-	}
-
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		app.infoLog.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
+	if err := app.tplCache["home.page.gohtml"].Execute(w, nil); err != nil {
+		app.serverError(w, err)
 		return
 	}
-
-	err = ts.Execute(w, nil)
-	if err != nil {
-		app.infoLog.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
-	}
 }
+
 
 func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -64,6 +50,7 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if id < 1 || err != nil {
 		http.NotFound(w, r)
+		return
 	}
 
 	snippet, err := app.snippets.Get(id)
@@ -77,9 +64,9 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	_, err = w.Write([]byte(snippet.String()))
-	if err != nil {
+	if app.tplCache["show.page.gohtml"].Execute(w, snippet) != nil {
 		app.serverError(w, err)
+		return
 	}
 }
 
